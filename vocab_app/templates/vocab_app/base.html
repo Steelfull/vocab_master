@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VocabMaster</title>
+
+</head>
+<body>
+    <nav>
+        {% if user.is_authenticated %}
+            <a href="{% url 'add_word' %}">Wort hinzufügen</a>
+
+        {% else %}
+
+        {% endif %}
+    </nav>
+    {% block content %}{% endblock %}
+</body>
+</html>
