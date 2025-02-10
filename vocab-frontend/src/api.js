@@ -1,23 +1,30 @@
 import axios from 'axios';
 
-
+  
+// api.js
 const getCSRFToken = () => {
-    const cookieValue = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('csrftoken='))
-      ?.split('=')[1];
-    return cookieValue;
-  };
-
-// Korrekte Axios-Konfiguration
-const api = axios.create({
+  const cookies = document.cookie.split('; ');
+  // Nehme das letzte CSRF-Token-Cookie
+  const csrfCookie = cookies.reverse().find(c => c.startsWith('csrftoken='));
+  return csrfCookie ? csrfCookie.split('=')[1] : null;
+};
+  
+  const api = axios.create({
     baseURL: "http://localhost:8000/",
-    withCredentials: true,  // Sendet Cookies
+    withCredentials: true,
     headers: {
-      "X-CSRFToken": getCSRFToken(),
       "Content-Type": "application/json"
     }
   });
+  
+  api.interceptors.request.use(config => {
+    if (['post', 'put', 'patch', 'delete'].includes(config.method.toLowerCase())) {
+      config.headers['X-CSRFToken'] = getCSRFToken();
+    }
+    return config;
+  });
+
+export default api;
 
 // Funktionen exportieren
 export const addWord = (wordData) => api.post('/vocabulary/words/', wordData);

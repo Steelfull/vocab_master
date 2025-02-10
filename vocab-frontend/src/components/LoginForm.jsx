@@ -1,26 +1,46 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api';  
+import { useAuth } from '../context/AuthContext';  
 
 export default function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { loginUser } = useAuth(); 
+
+  useEffect(() => {
+    // CSRF-Token mit Credentials holen
+    api.get('/api/csrf_token/', { withCredentials: true })
+      .then(() => console.log('CSRF-Token gesetzt:', document.cookie))
+      .catch(console.error);
+  }, []);
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Explizite Cookie-Prüfung
+    if (!document.cookie.includes('csrftoken')) {
+      alert('CSRF-Token fehlt!');
+      return;
+    }
+  
     try {
-      const response = await axios.post(
-        'http://localhost:8000/api/login/',
+      const response = await api.post('/api/login/', 
         { username, password },
-        { withCredentials: true }
+        {
+          headers: {
+            'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)[1],
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        }
       );
-      
       if (response.status === 200) {
-        localStorage.setItem('isAuthenticated', 'true');  // Login-Status speichern
-        navigate('/');  // Weiterleitung zur Startseite
+        loginUser();  // Setzt den Authentifizierungszustand
+        navigate('/add-word');  // Weiterleitung zur geschützten Route
       }
     } catch (err) {
       setError('Ungültige Anmeldedaten');

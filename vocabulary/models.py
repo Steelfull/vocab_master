@@ -4,6 +4,12 @@ from django.db import models
 from users.models import CustomUser
 
 class GermanWord(models.Model):
+    NOUN = "NOUN"
+    VERB = "VERB"
+    ADJ = "ADJ"
+    CONJ = "CONJ"
+    PREP = "PREP"
+    
     WORD_CLASS_CHOICES = [
         ('NOUN', 'Substantiv'),
         ('VERB', 'Verb'),
@@ -15,7 +21,7 @@ class GermanWord(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     base_form = models.CharField(max_length=100)  # Z.B. "haben"
     word_class = models.CharField(max_length=50, choices=WORD_CLASS_CHOICES)
-    gender = models.CharField(max_length=10, null=True, blank=True)  # Für Nomen
+    gender = models.CharField(max_length=10)  # Für Nomen
     metadata = models.JSONField()  # ChatGPT-Antworten werden hier gespeichert
 
     def __str__(self):

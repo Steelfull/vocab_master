@@ -28,9 +28,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-# Sicherstellen, dass diese Einstellungen existieren
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
-CORS_ALLOW_CREDENTIALS = True  # Wichtig für Cookies
 
 # Application definition
 
@@ -61,9 +58,9 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',  # Muss VOR CSRF sein!
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',  # Jetzt korrekt nach Session
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -71,11 +68,14 @@ MIDDLEWARE = [
 ]
 
 
-
+# settings.py
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-    ]
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+]
 }
 
 # settings.py
@@ -161,3 +161,42 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',  # React-Frontend
+]
+
+SESSION_COOKIE_SECURE = False  # Für HTTP in Entwicklung
+SESSION_COOKIE_SAMESITE = 'Lax'  # Erlaubt Cookies für Cross-Origin-Requests
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Sicherstellen, dass diese Einstellungen existieren
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+]
+CORS_ALLOW_CREDENTIALS = True  # Wichtig für Cookies
+# settings.py
+# settings.py (ergänzen)
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',     # Wichtig für CSRF
+    'x-requested-with',
+]
+
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # bleibt auch nach Schließen des Browsers bestehen
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()
+
+# settings.py (Nur als letzte Lösung)
+
+
+
