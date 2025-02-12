@@ -30,6 +30,15 @@ export default api;
 export const addWord = (wordData) => api.post('/vocabulary/words/', wordData);
 export const generateMetadata = (word) => api.post('/vocabulary/generate-metadata/', { word });
 export const getWords = () => api.get('/vocabulary/words/');
-export const generateExercise = (exerciseTypeId) => api.post('/exercises/generate-exercise/', { exercise_type_id: exerciseTypeId });
-export const submitAnswer = (exerciseItemId, userAnswer) => api.post(`/exercises/items/${exerciseItemId}/submit-answer/`, { user_answer: userAnswer });
 export const generateCombinationExercise = (exerciseTypeId) => api.post('/exercises/generate-combination-exercise/', { exercise_type_id: exerciseTypeId });
+export const generateExercise = (typeId) => 
+  api.post('/exercises/generate/', { exercise_type: typeId });
+
+export const checkAnswer = (itemId, answer) =>
+  api.post(`/exercises/items/${itemId}/check/`, { answer });
+
+
+
+// Am Ende der Datei hinzufügen
+export const submitAnswer = (exerciseItemId, userAnswer) => 
+  api.post(`/exercises/items/${exerciseItemId}/submit-answer/`, { user_answer: userAnswer });

@@ -40,7 +40,7 @@ export default function LoginForm() {
       );
       if (response.status === 200) {
         loginUser();  // Setzt den Authentifizierungszustand
-        navigate('/add-word');  // Weiterleitung zur geschützten Route
+        navigate('/dashboard');  // Weiterleitung zur geschützten Route
       }
     } catch (err) {
       setError('Ungültige Anmeldedaten');
