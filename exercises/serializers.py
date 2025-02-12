@@ -17,3 +17,10 @@ class ExerciseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exercise
         fields = ['id', 'user', 'exercise_type', 'created_at', 'completed', 'items']
+        
+# exercises/serializers.py
+class ExerciseFeedbackSerializer(serializers.Serializer):
+    is_correct = serializers.BooleanField()
+    correct_answer = serializers.CharField()
+    explanation = serializers.CharField()
+    progress_change = serializers.FloatField()

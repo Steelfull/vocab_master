@@ -26,5 +26,6 @@ urlpatterns = [
     path('vocabulary/', include('vocabulary.urls')),
     path('', views.home, name='home'),
     path('api/', include('users.urls')),
+
     path('api/vocabulary/', include('vocabulary.urls')),
 ]

@@ -36,3 +36,23 @@ class ExerciseItem(models.Model):
 
     def __str__(self):
         return f"{self.question} - {self.exercise.user.username}"
+    
+    
+# exercises/models.py
+
+class ExerciseType(models.Model):
+    CATEGORY_CHOICES = [
+        ('DECLENSION', 'Deklination'),
+        ('CONJUGATION', 'Konjugation'),
+        ('SYNTAX', 'Satzbau')
+    ]
+    
+    STRUCTURE_CHOICES = [
+        ('ARTICLE_NOUN', 'Artikel + Substantiv'),
+        ('PRONOUN_NOUN', 'Pronomen + Substantiv'),
+        ('ADJ_NOUN', 'Adjektiv + Substantiv')
+    ]
+    
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    structure = models.CharField(max_length=20, choices=STRUCTURE_CHOICES)
+    # ... bestehende Felder

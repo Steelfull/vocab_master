@@ -18,6 +18,19 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import permissions
 
 
+from rest_framework.decorators import api_view
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
+# users/views.py
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def check_auth(request):
+    if request.user.is_authenticated:
+        return Response({'status': 'authenticated'})
+    return Response({'status': 'unauthenticated'}, status=401)
 
 
 def get_csrf_token(request):
@@ -27,7 +40,6 @@ def get_csrf_token(request):
     response.set_cookie(
         'csrftoken',
         token,
-        domain='localhost',
         secure=False,
         samesite='Lax',
         httponly=False,
@@ -48,7 +60,7 @@ class RegisterView(APIView):
 
 
 class LoginAPIView(APIView):
-    permission_classes = [permissions.AllowAny]  # Kritische Ergänzung
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         username = request.data.get('username')
@@ -58,7 +70,10 @@ class LoginAPIView(APIView):
         
         if user:
             login(request, user)
-            return Response({'message': 'Login erfolgreich'}, status=200)
+            return Response({
+                'message': 'Login erfolgreich',
+                'redirect': '/dashboard'  # Redirect-Ziel hinzufügen
+            }, status=200)
         return Response(
             {'error': 'Ungültige Anmeldedaten'},
             status=401

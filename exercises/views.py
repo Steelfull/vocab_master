@@ -22,42 +22,75 @@ class SubmitAnswerAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+
+    
+    
 class GenerateExerciseAPIView(APIView):
     def post(self, request, *args, **kwargs):
-        user = request.user
-        exercise_type_id = request.data.get('exercise_type_id')
+        exercise_type = self.get_exercise_type(request.data)
+        generator = self.get_generator(exercise_type)
+        exercise = generator.generate()
+        return Response(exercise.serialize(), status=201)
 
-        try:
-            exercise_type = ExerciseType.objects.get(id=exercise_type_id)
-        except ExerciseType.DoesNotExist:
-            return Response(
-                {'error': 'Übungstyp nicht gefunden.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+    def get_generator(self, exercise_type):
+        generators = {
+            'ARTICLE_NOUN': ArticleNounGenerator,
+            'PRONOUN_NOUN': PronounNounGenerator,
+            'ADJ_NOUN': AdjectiveNounGenerator
+        }
+        return generators[exercise_type.structure](self.request.user)
+    
+    
+class BaseExerciseGenerator:
+    def __init__(self, user):
+        self.user = user
+        self.words = GermanWord.objects.filter(user=user)
+    
+    def generate_question(self, word):
+        raise NotImplementedError
+        
+    def generate(self):
+        exercise = Exercise.objects.create(...)
+        for word in selected_words:
+            question_data = self.generate_question(word)
+            ExerciseItem.objects.create(...)
+        return exercise
+    
+class ArticleNounGenerator(BaseExerciseGenerator):
+    CASES = ['nominativ', 'akkusativ', 'dativ', 'genitiv']
+    NUMBERS = ['singular', 'plural']
+    
+    def generate_question(self, word):
+        case = random.choice(self.CASES)
+        number = random.choice(self.NUMBERS)
+        
+        return {
+            'type': 'ARTICLE_NOUN',
+            'question': f"Ergänze Artikel und Substantiv im {case} {number}:",
+            'hint': {
+                'gender': word.gender,
+                'case': case,
+                'number': number
+            },
+            'correct_answer': {
+                'article': word.metadata['declinations'][case][number]['article'],
+                'noun': word.metadata['declinations'][case][number]['form']
+            }
+        }
+        
+# exercises/views.py
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
-        # Erstelle eine neue Übung
-        exercise = Exercise.objects.create(user=user, exercise_type=exercise_type)
-
-        # Wähle zufällige Wörter für die Übung aus
-        words = GermanWord.objects.filter(user=user)
-        if not words.exists():
-            return Response(
-                {'error': 'Keine Wörter gefunden.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Generiere Übungsaufgaben
-        for word in random.sample(list(words), min(5, len(words))):  # Maximal 5 Aufgaben
-            question = f"Dekliniere das Wort '{word.base_form}' im Nominativ Singular."
-            correct_answer = word.metadata.get('declinations', {}).get('nominativ', {}).get('singular', 'N/A')
-
-            ExerciseItem.objects.create(
-                exercise=exercise,
-                word=word,
-                question=question,
-                correct_answer=correct_answer
-            )
-
-        # Serialisiere die Übung für die Antwort
-        serializer = ExerciseSerializer(exercise)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+@api_view(['GET'])
+def user_progress(request):
+    completed = Exercise.objects.filter(user=request.user, completed=True).count()
+    total = Exercise.objects.filter(user=request.user).count()
+    return Response({
+        'progress': (completed / total) * 100 if total > 0 else 0,
+        'streak': request.user.streak,
+        'recent_exercises': ExerciseSerializer(
+            Exercise.objects.filter(user=request.user).order_by('-created_at')[:3],
+            many=True
+        ).data
+    })

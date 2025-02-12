@@ -64,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
     
 ]
 
@@ -189,14 +190,17 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',     # Wichtig für CSRF
     'x-requested-with',
+    'cookie',  # Explizit erlauben
+    'credentials'
 ]
 
-CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken', 'set-cookie']
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # bleibt auch nach Schließen des Browsers bestehen
 CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()
 
-# settings.py (Nur als letzte Lösung)
-
-
+# settings.py
+SESSION_COOKIE_AGE = 1209600  # 2 Wochen (Standard)
+SESSION_SAVE_EVERY_REQUEST = True  # Session bei jedem Request verlängern
+SESSION_COOKIE_DOMAIN = 'localhost'  # Explizite Domain für Entwicklung
 
