@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import GermanWord, Declination, Article, Pronoun, Conjunction
+from .models import GermanWord, Declination, Article, Pronoun, Conjunction, AdjectiveForm
 
 class GermanWordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -68,3 +68,10 @@ class ConjunctionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conjunction
         fields = ['id', 'conjunction_type', 'case_governed', 'word']
+        
+        
+
+class AdjectiveFormSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdjectiveForm
+        fields = ['id', 'word', 'case', 'number', 'gender', 'form']

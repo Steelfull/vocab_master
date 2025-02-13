@@ -93,3 +93,34 @@ class Conjunction(models.Model):
 
     def __str__(self):
         return f"{self.word} ({self.get_conjunction_type_display()}, regiert {self.case_governed})"
+    
+    
+# vocabulary/models.py
+class AdjectiveForm(models.Model):
+    CASES = [
+        ('nominativ', 'Nominativ'),
+        ('akkusativ', 'Akkusativ'),
+        ('dativ', 'Dativ'),
+        ('genitiv', 'Genitiv')
+    ]
+    GENDERS = [
+        ('masculine', 'Maskulinum'),
+        ('feminine', 'Femininum'),
+        ('neuter', 'Neutrum')
+    ]
+    NUMBERS = [
+        ('singular', 'Singular'),
+        ('plural', 'Plural')
+    ]
+    
+    word = models.ForeignKey(GermanWord, on_delete=models.CASCADE)
+    case = models.CharField(max_length=20, choices=CASES)
+    number = models.CharField(max_length=20, choices=NUMBERS)
+    gender = models.CharField(max_length=20, choices=GENDERS)  # Geschlecht der Deklination
+    form = models.CharField(max_length=100)  # Die deklinierten Formen (z. B. "guter", "gute", "gutes")
+
+    class Meta:
+        unique_together = ('word', 'case', 'number', 'gender')
+
+    def __str__(self):
+        return f"{self.word.base_form} ({self.case}, {self.number}, {self.gender})"

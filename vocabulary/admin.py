@@ -1,15 +1,19 @@
 from django.contrib import admin
 from django.contrib import admin
-from .models import GermanWord, Declination, Article, Pronoun, Conjunction
+from .models import GermanWord, Declination, Article, Pronoun, Conjunction, AdjectiveForm
 
 class DeclinationInline(admin.TabularInline):
     model = Declination
     extra = 4  # 4 Kasus pro Wort
 
+class AdjectiveFormInline(admin.TabularInline):
+    model = AdjectiveForm
+    extra = 12
+
 @admin.register(GermanWord)
 class GermanWordAdmin(admin.ModelAdmin):
     list_display = ('base_form', 'word_class', 'user')
-    inlines = [DeclinationInline]
+    inlines = [DeclinationInline, AdjectiveFormInline]
     search_fields = ('base_form',)
     
 
@@ -34,3 +38,8 @@ class PronounAdmin(admin.ModelAdmin):
 class ConjunctionAdmin(admin.ModelAdmin):
     list_display = ('conjunction_type', 'case_governed', 'word')
     list_filter = ('conjunction_type', 'case_governed')
+    
+@admin.register(AdjectiveForm)
+class AdjectiveFormAdmin(admin.ModelAdmin):
+    list_display = ('word', 'case', 'number', 'gender', 'form')
+    list_filter = ('case', 'number', 'gender')
