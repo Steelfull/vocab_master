@@ -96,20 +96,44 @@ class GenerateMetadataAPIView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
             
-class WordListCreateAPIView(generics.ListCreateAPIView):
+from rest_framework import generics
+from .models import GermanWord, Declination, Article, Pronoun, Conjunction
+from .serializers import GermanWordSerializer, DeclinationSerializer, ArticleSerializer, PronounSerializer, ConjunctionSerializer
+from rest_framework.permissions import IsAuthenticated
+
+class GermanWordListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = GermanWordSerializer
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-        # Zeigt nur die Wörter des aktuellen Users
         return GermanWord.objects.filter(user=self.request.user)
     
     def perform_create(self, serializer):
-        # Setze den aktuellen Benutzer automatisch
         serializer.save(user=self.request.user)
-        
-        
-import json
-from django.http import JsonResponse
 
+class DeclinationListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = DeclinationSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return Declination.objects.filter(word__user=self.request.user)
+    
+    def perform_create(self, serializer):
+        word_id = self.request.data.get('word')
+        word = GermanWord.objects.get(id=word_id, user=self.request.user)
+        serializer.save(word=word)
 
+class ArticleListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = ArticleSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Article.objects.all()
+
+class PronounListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = PronounSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Pronoun.objects.all()
+
+class ConjunctionListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = ConjunctionSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Conjunction.objects.all()

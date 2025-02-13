@@ -204,3 +204,8 @@ SESSION_COOKIE_AGE = 1209600  # 2 Wochen (Standard)
 SESSION_SAVE_EVERY_REQUEST = True  # Session bei jedem Request verlängern
 SESSION_COOKIE_DOMAIN = 'localhost'  # Explizite Domain für Entwicklung
 
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",  # React-Entwicklungsserver
+]
